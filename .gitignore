@@ -25,3 +25,7 @@ dist-ssr
 
 # Source reference files
 .source-reference/
+
+# Environment
+.env
+.env.local
