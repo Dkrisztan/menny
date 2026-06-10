@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+@theme {
+  --color-menny-black: oklch(16.5% .012 50);
+  --color-menny-cream: oklch(92.7% .046 88);
+  --color-menny-red: oklch(56.6% .187 32.5);
+  --color-menny-yellow: oklch(84.4% .151 88.5);
+
+  --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background-color: var(--color-menny-black);
+    color: var(--color-menny-cream);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image:
+      radial-gradient(at 12% 8%, color-mix(in oklab, var(--color-menny-red) 12%, transparent) 0px, transparent 50%),
+      radial-gradient(at 88% 92%, color-mix(in oklab, var(--color-menny-yellow) 8%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-display);
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-menny-red);
+    color: var(--color-menny-cream);
+    border: 2px solid var(--color-menny-black);
+    box-shadow: 4px 4px 0 0 var(--color-menny-black);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 6px 6px 0 0 var(--color-menny-yellow);
+    transform: translate(-2px, -2px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-menny-yellow);
+    color: var(--color-menny-black);
+    border: 2px solid var(--color-menny-black);
+    box-shadow: 4px 4px 0 0 var(--color-menny-red);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .btn-secondary:hover {
+    box-shadow: 6px 6px 0 0 var(--color-menny-black);
+    transform: translate(-2px, -2px);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    border: 1.5px solid;
+    border-radius: 999px;
+  }
+
+  .poster-card {
+    background: var(--color-menny-cream);
+    color: var(--color-menny-black);
+    border: 2px solid var(--color-menny-black);
+    box-shadow: 6px 6px 0 0 var(--color-menny-black);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .poster-card:hover {
+    box-shadow: 10px 10px 0 0 var(--color-menny-red);
+    transform: translate(-2px, -2px) rotate(0) !important;
+  }
+
+  .poster-yellow {
+    background: var(--color-menny-yellow);
+    color: var(--color-menny-black);
+    border: 2px solid var(--color-menny-black);
+    box-shadow: 6px 6px 0 0 var(--color-menny-red);
+  }
+
+  .weekly-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .weekly-card:hover {
+    box-shadow: 8px 8px 0 0 var(--color-menny-red) !important;
+    transform: rotate(0) translate(-2px, -2px) !important;
+  }
+
+  .grain {
+    position: relative;
+  }
+
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
+  }
+}
