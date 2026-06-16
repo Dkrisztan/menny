@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { sql, desc } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { pageViews } from '../db/schema/index.ts'
+import { adminAuth } from '../middleware/admin-auth.ts'
 
 export const analyticsRouter = new Hono()
 
@@ -39,9 +40,9 @@ analyticsRouter.post('/track', async (c) => {
   return c.json({ success: true })
 })
 
-analyticsRouter.get('/summary', async (c) => {
+analyticsRouter.get('/summary', adminAuth, async (c) => {
   const days = Number(c.req.query('days') ?? '30')
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
 
   const [totals] = await db
     .select({

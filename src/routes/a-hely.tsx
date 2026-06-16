@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 import { WavyLine } from '../components/ui/WavyLine'
 import { Asterisk } from '../components/ui/Asterisk'
 
@@ -6,14 +7,13 @@ export const Route = createFileRoute('/a-hely')({
   component: AHelyPage,
 })
 
-const PHOTOS = [
-  { bg: 'var(--color-menny-red)', rotate: '-1.5deg', label: 'FOTÓ #1' },
-  { bg: 'var(--color-menny-yellow)', rotate: '1.5deg', label: 'FOTÓ #2' },
-  { bg: 'var(--color-menny-cream)', rotate: '-1.5deg', label: 'FOTÓ #3' },
-  { bg: 'var(--color-menny-red)', rotate: '1.5deg', label: 'FOTÓ #4' },
-  { bg: 'var(--color-menny-yellow)', rotate: '-1.5deg', label: 'FOTÓ #5' },
-  { bg: 'var(--color-menny-cream)', rotate: '1.5deg', label: 'FOTÓ #6' },
-]
+interface GalleryImage {
+  id: string
+  url: string
+  filename: string
+}
+
+const ROTATIONS = ['-1.5deg', '1.5deg', '-1.5deg', '1.5deg', '-1.5deg', '1.5deg']
 
 const TECH = [
   { icon: 'users', label: 'Férőhely', value: 'kb. 80 fő' },
@@ -23,6 +23,15 @@ const TECH = [
 ]
 
 function AHelyPage() {
+  const [photos, setPhotos] = useState<GalleryImage[]>([])
+
+  useEffect(() => {
+    fetch('/api/gallery')
+      .then((r) => r.json())
+      .then((data: GalleryImage[]) => setPhotos(data))
+      .catch(() => {})
+  }, [])
+
   return (
     <div className="px-4 md:px-6 py-12 md:py-16">
       <div className="mx-auto max-w-5xl">
@@ -65,23 +74,28 @@ function AHelyPage() {
           <h2 className="display text-4xl md:text-5xl text-menny-yellow">A tér</h2>
           <WavyLine className="w-40 h-2 text-menny-red my-2" />
           <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-            {PHOTOS.map((photo) => (
+            {photos.length > 0 ? photos.map((photo, i) => (
               <div
-                key={photo.label}
-                className="aspect-[4/3] border-2 border-menny-black grain relative flex items-center justify-center"
+                key={photo.id}
+                className="aspect-[4/3] border-2 border-menny-black grain relative overflow-hidden"
                 style={{
-                  background: photo.bg,
-                  transform: `rotate(${photo.rotate})`,
+                  transform: `rotate(${ROTATIONS[i % ROTATIONS.length]})`,
                   boxShadow: '5px 5px 0 0 var(--color-menny-black)',
                 }}
               >
-                <span className="display text-2xl text-menny-black/30">{photo.label}</span>
+                <img
+                  src={photo.url}
+                  alt={photo.filename}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
               </div>
-            ))}
+            )) : (
+              <p className="col-span-full mono text-xs text-menny-cream/50">
+                Hamarosan fotók...
+              </p>
+            )}
           </div>
-          <p className="mono text-xs text-menny-cream/50 mt-3">
-            * Itt lesznek az igazi fotók, amint a galéria elkészül.
-          </p>
         </section>
 
         {/* Tech & space */}

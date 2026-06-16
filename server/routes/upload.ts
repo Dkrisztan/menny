@@ -1,5 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { db } from '../db/index.ts'
+import { images } from '../db/schema/index.ts'
 import { getPresignedUploadUrl, getPublicUrl } from '../storage/minio.ts'
 
 export const uploadRouter = new Hono()
@@ -7,6 +9,13 @@ export const uploadRouter = new Hono()
 const presignSchema = z.object({
   filename: z.string().min(1),
   contentType: z.string().min(1),
+})
+
+const confirmSchema = z.object({
+  key: z.string().min(1),
+  filename: z.string().min(1),
+  mimeType: z.string().min(1),
+  size: z.number().int().positive(),
 })
 
 uploadRouter.post('/presign', async (c) => {
@@ -25,8 +34,21 @@ uploadRouter.post('/presign', async (c) => {
 
 uploadRouter.post('/confirm', async (c) => {
   const body = await c.req.json()
-  const key = z.string().min(1).parse(body.key)
-  const publicUrl = getPublicUrl(key)
+  const parsed = confirmSchema.safeParse(body)
 
-  return c.json({ url: publicUrl })
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.flatten() }, 400)
+  }
+
+  const url = getPublicUrl(parsed.data.key)
+
+  const [image] = await db.insert(images).values({
+    key: parsed.data.key,
+    url,
+    filename: parsed.data.filename,
+    mimeType: parsed.data.mimeType,
+    size: parsed.data.size,
+  }).returning()
+
+  return c.json(image)
 })
