@@ -17,7 +17,15 @@ import { ensureBucket } from './storage/minio.ts'
 const app = new Hono()
 
 app.use('/api/*', cors({
-  origin: ['http://localhost:5174', 'http://localhost:5173', env.BETTER_AUTH_URL],
+  origin: (origin) => {
+    const allowed = [
+      'http://localhost:5174',
+      'http://localhost:5173',
+      env.BETTER_AUTH_URL,
+    ]
+    if (!origin || allowed.includes(origin)) return origin
+    return null
+  },
   credentials: true,
   allowHeaders: ['Content-Type', 'Authorization'],
 }))
