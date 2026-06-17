@@ -44,9 +44,10 @@ app.route('/api/reservations', reservationRouter)
 app.route('/api/settings', settingsRouter)
 
 if (process.env.NODE_ENV === 'production') {
-  app.use('/admin/*', serveStatic({ root: './dist-admin', rewriteRequestPath: (p) => p.replace('/admin', '') }))
+  app.get('/admin', (c) => c.redirect('/admin/'))
+  app.get('/admin/*', serveStatic({ root: './dist-admin', rewriteRequestPath: (p) => p.replace('/admin/', '') }))
   app.get('/admin/*', serveStatic({ path: './dist-admin/index.html' }))
-  app.use('/*', serveStatic({ root: './dist' }))
+  app.get('/*', serveStatic({ root: './dist' }))
   app.get('*', serveStatic({ path: './dist/index.html' }))
 }
 
