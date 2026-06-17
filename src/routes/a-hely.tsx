@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import useEmblaCarousel from 'embla-carousel-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { WavyLine } from '../components/ui/WavyLine'
 import { Asterisk } from '../components/ui/Asterisk'
 
@@ -22,15 +24,56 @@ const TECH = [
   { icon: 'projector', label: 'Vetítő', value: 'Full HD + vászon' },
 ]
 
+const ITEMS_PER_PAGE = 6
+
+let galleryCache: GalleryImage[] | null = null
+
 function AHelyPage() {
-  const [photos, setPhotos] = useState<GalleryImage[]>([])
+  const [photos, setPhotos] = useState<GalleryImage[]>(galleryCache ?? [])
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(false)
+  const [lightbox, setLightbox] = useState<GalleryImage | null>(null)
+  const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
+    if (galleryCache) return
     fetch('/api/gallery')
       .then((r) => r.json())
-      .then((data: GalleryImage[]) => setPhotos(data))
+      .then((data: GalleryImage[]) => {
+        galleryCache = data
+        setPhotos(data)
+      })
       .catch(() => {})
   }, [])
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setCanPrev(emblaApi.canScrollPrev())
+    setCanNext(emblaApi.canScrollNext())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    onSelect()
+    emblaApi.on('select', onSelect)
+    emblaApi.on('reInit', onSelect)
+  }, [emblaApi, onSelect])
+
+  const openLightbox = (photo: GalleryImage) => {
+    setLightbox(photo)
+    dialogRef.current?.showModal()
+  }
+
+  const closeLightbox = () => {
+    dialogRef.current?.close()
+    setLightbox(null)
+  }
+
+  const slides = []
+  for (let i = 0; i < photos.length; i += ITEMS_PER_PAGE) {
+    slides.push(photos.slice(i, i + ITEMS_PER_PAGE))
+  }
 
   return (
     <div className="px-4 md:px-6 py-12 md:py-16">
@@ -69,33 +112,63 @@ function AHelyPage() {
           </div>
         </div>
 
-        {/* Photo gallery */}
+        {/* Photo gallery carousel */}
         <section className="mt-20">
           <h2 className="display text-4xl md:text-5xl text-menny-yellow">A tér</h2>
           <WavyLine className="w-40 h-2 text-menny-red my-2" />
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-            {photos.length > 0 ? photos.map((photo, i) => (
-              <div
-                key={photo.id}
-                className="aspect-[4/3] border-2 border-menny-black grain relative overflow-hidden"
-                style={{
-                  transform: `rotate(${ROTATIONS[i % ROTATIONS.length]})`,
-                  boxShadow: '5px 5px 0 0 var(--color-menny-black)',
-                }}
+
+          {photos.length > 0 ? (
+            <div className="mt-6 relative">
+              <button
+                onClick={() => emblaApi?.scrollPrev()}
+                disabled={!canPrev}
+                className="absolute -left-5 md:-left-12 top-1/2 -translate-y-1/2 z-10 p-2 border-2 border-menny-black bg-menny-cream/90 hover:bg-menny-yellow/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
-                <img
-                  src={photo.url}
-                  alt={photo.filename}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <ChevronLeft className="w-5 h-5 text-menny-black" />
+              </button>
+
+              <div className="overflow-hidden" ref={emblaRef}>
+                <div className="flex">
+                  {slides.map((slidePhotos, slideIdx) => (
+                    <div key={slideIdx} className="flex-[0_0_100%] min-w-0">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {slidePhotos.map((photo, i) => (
+                          <div
+                            key={photo.id}
+                            className="aspect-[4/3] border-2 border-menny-black grain relative overflow-hidden cursor-pointer hover:scale-[1.02] transition-transform"
+                            style={{
+                              transform: `rotate(${ROTATIONS[i % ROTATIONS.length]})`,
+                              boxShadow: '5px 5px 0 0 var(--color-menny-black)',
+                            }}
+                            onClick={() => openLightbox(photo)}
+                          >
+                            <img
+                              src={photo.url}
+                              alt={photo.filename}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )) : (
-              <p className="col-span-full mono text-xs text-menny-cream/50">
-                Hamarosan fotók...
-              </p>
-            )}
-          </div>
+
+              <button
+                onClick={() => emblaApi?.scrollNext()}
+                disabled={!canNext}
+                className="absolute -right-5 md:-right-12 top-1/2 -translate-y-1/2 z-10 p-2 border-2 border-menny-black bg-menny-cream/90 hover:bg-menny-yellow/40 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 text-menny-black" />
+              </button>
+            </div>
+          ) : (
+            <p className="mt-6 mono text-xs text-menny-cream/50">
+              Hamarosan fotók...
+            </p>
+          )}
         </section>
 
         {/* Tech & space */}
@@ -144,6 +217,31 @@ function AHelyPage() {
           </div>
         </section>
       </div>
+
+      <dialog
+        ref={dialogRef}
+        onClick={(e) => { if (e.target === dialogRef.current) closeLightbox() }}
+        onClose={() => setLightbox(null)}
+        className="fixed inset-0 z-50 m-auto p-4 bg-transparent backdrop:bg-black/80 backdrop:backdrop-blur-sm w-screen h-screen max-w-none max-h-none"
+      >
+        {lightbox && (
+          <>
+            <button
+              onClick={closeLightbox}
+              className="fixed top-4 right-4 z-10 p-2 text-white/80 hover:text-white transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="flex items-center justify-center w-full h-full">
+              <img
+                src={lightbox.url}
+                alt={lightbox.filename}
+                className="max-w-[90vw] max-h-[85vh] object-contain rounded-sm border-2 border-menny-cream/20 shadow-2xl"
+              />
+            </div>
+          </>
+        )}
+      </dialog>
     </div>
   )
 }

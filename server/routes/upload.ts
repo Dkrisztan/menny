@@ -1,8 +1,9 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { images } from '../db/schema/index.ts'
-import { getPresignedUploadUrl, getPublicUrl } from '../storage/minio.ts'
+import { getPresignedUploadUrl, getPublicUrl, deleteObject } from '../storage/minio.ts'
 
 export const uploadRouter = new Hono()
 
@@ -16,6 +17,25 @@ const confirmSchema = z.object({
   filename: z.string().min(1),
   mimeType: z.string().min(1),
   size: z.number().int().positive(),
+})
+
+uploadRouter.get('/', async (c) => {
+  const results = await db.select().from(images).orderBy(desc(images.createdAt))
+  return c.json(results)
+})
+
+uploadRouter.delete('/:id', async (c) => {
+  const id = c.req.param('id')
+  const [image] = await db.select().from(images).where(eq(images.id, id))
+
+  if (!image) {
+    return c.json({ error: 'Not found' }, 404)
+  }
+
+  await deleteObject(image.key)
+  await db.delete(images).where(eq(images.id, id))
+
+  return c.json({ success: true })
 })
 
 uploadRouter.post('/presign', async (c) => {

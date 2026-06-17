@@ -14,6 +14,16 @@ export async function ensureBucket() {
   if (!exists) {
     await minioClient.makeBucket(env.MINIO_BUCKET)
   }
+  const policy = JSON.stringify({
+    Version: '2012-10-17',
+    Statement: [{
+      Effect: 'Allow',
+      Principal: { AWS: ['*'] },
+      Action: ['s3:GetObject'],
+      Resource: [`arn:aws:s3:::${env.MINIO_BUCKET}/*`],
+    }],
+  })
+  await minioClient.setBucketPolicy(env.MINIO_BUCKET, policy)
 }
 
 export async function getPresignedUploadUrl(key: string, _contentType: string): Promise<string> {

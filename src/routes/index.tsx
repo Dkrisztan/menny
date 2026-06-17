@@ -4,6 +4,7 @@ import { WeeklySchedule } from '../components/home/WeeklySchedule'
 import { NextEvents } from '../components/home/NextEvents'
 import { About } from '../components/home/About'
 import { InstaWall } from '../components/home/InstaWall'
+import { Reservation } from '../components/home/Reservation'
 import { CtaSection } from '../components/home/CtaSection'
 
 export const Route = createFileRoute('/')({
@@ -17,6 +18,7 @@ function HomePage() {
       <WeeklySchedule />
       <NextEvents />
       <About />
+      <Reservation />
       <InstaWall />
       <CtaSection />
     </div>

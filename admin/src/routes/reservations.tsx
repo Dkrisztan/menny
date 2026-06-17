@@ -83,12 +83,14 @@ function ReservationsPage() {
 
       <ButtonGroup>
         <Button
+          size="sm"
           variant={view === 'pending' ? 'default' : 'outline'}
           onClick={() => setView('pending')}
         >
           Pending {pending.length > 0 && <Badge className="ml-1.5 bg-primary-foreground/20 text-primary-foreground text-xs">{pending.length}</Badge>}
         </Button>
         <Button
+          size="sm"
           variant={view === 'responded' ? 'default' : 'outline'}
           onClick={() => setView('responded')}
         >

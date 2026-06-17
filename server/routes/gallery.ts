@@ -9,6 +9,7 @@ export const galleryRouter = new Hono()
 
 galleryRouter.get('/', async (c) => {
   const results = await db.select().from(images).orderBy(desc(images.createdAt))
+  c.header('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400')
   return c.json(results)
 })
 

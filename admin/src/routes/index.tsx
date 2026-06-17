@@ -44,10 +44,10 @@ function DashboardPage() {
           {data && data.dailyViews.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={data.dailyViews}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="currentColor" />
                 <YAxis tick={{ fontSize: 12 }} stroke="currentColor" />
-                <Tooltip contentStyle={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }} />
+                <Tooltip cursor={false} contentStyle={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)', color: 'var(--color-card-foreground)', borderRadius: '6px' }} />
                 <Area type="monotone" dataKey="views" stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.15} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -67,11 +67,11 @@ function DashboardPage() {
           {data && data.topPages.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={data.topPages} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis type="number" tick={{ fontSize: 12 }} stroke="currentColor" />
                 <YAxis dataKey="path" type="category" tick={{ fontSize: 12 }} width={120} stroke="currentColor" />
-                <Tooltip contentStyle={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)' }} />
-                <Bar dataKey="views" fill="var(--color-accent)" radius={[0, 4, 4, 0]} />
+                <Tooltip cursor={false} contentStyle={{ backgroundColor: 'var(--color-card)', border: '1px solid var(--color-border)', color: 'var(--color-card-foreground)', borderRadius: '6px' }} />
+                <Bar dataKey="views" fill="var(--color-primary)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
