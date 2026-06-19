@@ -18,5 +18,5 @@ COPY server/ ./server/
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/dist-admin ./dist-admin
 
-EXPOSE 3000
+EXPOSE 3000 3001
 CMD ["bun", "run", "server/index.ts"]

@@ -12,15 +12,13 @@ import { scheduleRouter } from './routes/schedule.ts'
 import { galleryRouter } from './routes/gallery.ts'
 import { reservationRouter } from './routes/reservations.ts'
 import { settingsRouter } from './routes/settings.ts'
-import { ensureBucket } from './storage/minio.ts'
 
-const app = new Hono()
+const admin = new Hono()
 
-app.use('/api/*', cors({
+admin.use('/api/*', cors({
   origin: (origin) => {
     const allowed = [
       'http://localhost:5174',
-      'http://localhost:5173',
       env.BETTER_AUTH_URL,
     ]
     if (!origin || allowed.includes(origin)) return origin
@@ -30,30 +28,28 @@ app.use('/api/*', cors({
   allowHeaders: ['Content-Type', 'Authorization'],
 }))
 
-app.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw))
+admin.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw))
 
-app.use('/api/upload/*', adminAuth)
-app.route('/api/upload', uploadRouter)
+admin.use('/api/upload/*', adminAuth)
+admin.route('/api/upload', uploadRouter)
 
-app.route('/api/events', eventsRouter)
-app.route('/api/contact', contactRouter)
-app.route('/api/analytics', analyticsRouter)
-app.route('/api/schedule', scheduleRouter)
-app.route('/api/gallery', galleryRouter)
-app.route('/api/reservations', reservationRouter)
-app.route('/api/settings', settingsRouter)
+admin.route('/api/events', eventsRouter)
+admin.route('/api/contact', contactRouter)
+admin.route('/api/analytics', analyticsRouter)
+admin.route('/api/schedule', scheduleRouter)
+admin.route('/api/gallery', galleryRouter)
+admin.route('/api/reservations', reservationRouter)
+admin.route('/api/settings', settingsRouter)
 
 if (process.env.NODE_ENV === 'production') {
-  app.get('/*', serveStatic({ root: './dist' }))
-  app.get('*', serveStatic({ path: './dist/index.html' }))
+  admin.get('/*', serveStatic({ root: './dist-admin' }))
+  admin.get('*', serveStatic({ path: './dist-admin/index.html' }))
 }
 
-await ensureBucket()
-
-import { startAdminServer } from './admin.ts'
-startAdminServer()
-
-export default {
-  port: env.PORT,
-  fetch: app.fetch,
+export function startAdminServer() {
+  Bun.serve({
+    port: env.ADMIN_PORT,
+    fetch: admin.fetch,
+  })
+  console.log(`Admin server: http://localhost:${env.ADMIN_PORT}`)
 }
