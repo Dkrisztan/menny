@@ -20,6 +20,7 @@ admin.use('/api/*', cors({
     const allowed = [
       'http://localhost:5174',
       env.BETTER_AUTH_URL,
+      env.ADMIN_URL,
     ]
     if (!origin || allowed.includes(origin)) return origin
     return null

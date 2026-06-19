@@ -29,3 +29,12 @@ dist-ssr
 # Environment
 .env
 .env.local
+
+# SSL certs
+nginx/certs/*.pem
+nginx/certbot-webroot/*
+!nginx/certs/.gitkeep
+!nginx/certbot-webroot/.gitkeep
+
+# Build output
+dist-admin
