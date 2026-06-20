@@ -31,7 +31,11 @@ export async function getPresignedUploadUrl(key: string, _contentType: string): 
 }
 
 export function getPublicUrl(key: string): string {
-  return `http://${env.MINIO_ENDPOINT}:${env.MINIO_PORT}/${env.MINIO_BUCKET}/${key}`
+  return `${env.BETTER_AUTH_URL}/uploads/${key}`
+}
+
+export async function getObject(key: string) {
+  return await minioClient.getObject(env.MINIO_BUCKET, key)
 }
 
 export async function deleteObject(key: string): Promise<void> {

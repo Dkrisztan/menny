@@ -4,6 +4,7 @@ import { cors } from 'hono/cors'
 import { env } from './env.ts'
 import { auth } from './auth.ts'
 import { adminAuth } from './middleware/admin-auth.ts'
+import { getObject } from './storage/minio.ts'
 import { eventsRouter } from './routes/events.ts'
 import { contactRouter } from './routes/contact.ts'
 import { analyticsRouter } from './routes/analytics.ts'
@@ -41,6 +42,23 @@ admin.route('/api/schedule', scheduleRouter)
 admin.route('/api/gallery', galleryRouter)
 admin.route('/api/reservations', reservationRouter)
 admin.route('/api/settings', settingsRouter)
+
+admin.get('/uploads/:key', async (c) => {
+  const key = c.req.param('key')
+  try {
+    const stream = await getObject(key)
+    const ext = key.split('.').pop()?.toLowerCase()
+    const mimeTypes: Record<string, string> = {
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+      gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    }
+    c.header('Content-Type', mimeTypes[ext ?? ''] ?? 'application/octet-stream')
+    c.header('Cache-Control', 'public, max-age=31536000, immutable')
+    return c.body(stream as unknown as ReadableStream)
+  } catch {
+    return c.notFound()
+  }
+})
 
 if (process.env.NODE_ENV === 'production') {
   admin.get('/*', serveStatic({ root: './dist-admin' }))

@@ -12,7 +12,7 @@ import { scheduleRouter } from './routes/schedule.ts'
 import { galleryRouter } from './routes/gallery.ts'
 import { reservationRouter } from './routes/reservations.ts'
 import { settingsRouter } from './routes/settings.ts'
-import { ensureBucket } from './storage/minio.ts'
+import { ensureBucket, getObject } from './storage/minio.ts'
 
 const app = new Hono()
 
@@ -42,6 +42,23 @@ app.route('/api/schedule', scheduleRouter)
 app.route('/api/gallery', galleryRouter)
 app.route('/api/reservations', reservationRouter)
 app.route('/api/settings', settingsRouter)
+
+app.get('/uploads/:key', async (c) => {
+  const key = c.req.param('key')
+  try {
+    const stream = await getObject(key)
+    const ext = key.split('.').pop()?.toLowerCase()
+    const mimeTypes: Record<string, string> = {
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+      gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    }
+    c.header('Content-Type', mimeTypes[ext ?? ''] ?? 'application/octet-stream')
+    c.header('Cache-Control', 'public, max-age=31536000, immutable')
+    return c.body(stream as unknown as ReadableStream)
+  } catch {
+    return c.notFound()
+  }
+})
 
 if (process.env.NODE_ENV === 'production') {
   app.get('/*', serveStatic({ root: './dist' }))
