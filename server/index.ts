@@ -12,7 +12,7 @@ import { scheduleRouter } from './routes/schedule.ts'
 import { galleryRouter } from './routes/gallery.ts'
 import { reservationRouter } from './routes/reservations.ts'
 import { settingsRouter } from './routes/settings.ts'
-import { ensureBucket, getObject } from './storage/minio.ts'
+import { ensureBucket, getObject } from './storage/s3.ts'
 
 const app = new Hono()
 

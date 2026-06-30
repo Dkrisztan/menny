@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { images } from '../db/schema/index.ts'
-import { getPresignedUploadUrl, getPublicUrl, deleteObject } from '../storage/minio.ts'
+import { getPresignedUploadUrl, getPublicUrl, deleteObject } from '../storage/s3.ts'
 
 export const uploadRouter = new Hono()
 

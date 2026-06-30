@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { eq, desc } from 'drizzle-orm'
 import { db } from '../db/index.ts'
 import { images } from '../db/schema/index.ts'
-import { deleteObject } from '../storage/minio.ts'
+import { deleteObject } from '../storage/s3.ts'
 import { adminAuth } from '../middleware/admin-auth.ts'
 
 export const galleryRouter = new Hono()
