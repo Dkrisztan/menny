@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === 'production') {
   app.get('*', serveStatic({ path: './dist/index.html' }))
 }
 
-await ensureBucket()
+ensureBucket().catch((err) => console.error('S3 bucket init failed:', err.message))
 
 import { startAdminServer } from './admin.ts'
 startAdminServer()
