@@ -5,7 +5,7 @@ RUN bun install --frozen-lockfile
 
 FROM install AS build
 COPY . .
-RUN bun run build:all
+RUN bun run build
 
 FROM oven/bun:1 AS production
 WORKDIR /app
@@ -16,7 +16,6 @@ RUN bun install --frozen-lockfile --production
 
 COPY server/ ./server/
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/dist-admin ./dist-admin
 
-EXPOSE 3000 3001
+EXPOSE 3000
 CMD ["bun", "run", "server/index.ts"]

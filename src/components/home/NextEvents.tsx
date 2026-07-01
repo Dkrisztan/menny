@@ -1,6 +1,31 @@
+import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { strapiGet } from '../../lib/strapi'
+
+interface Event {
+  id: string
+  title: string
+  date: string
+  category: string
+}
 
 export function NextEvents() {
+  const [events, setEvents] = useState<Event[]>([])
+
+  useEffect(() => {
+    const now = new Date().toISOString()
+    strapiGet<any>(`/api/events?filters[date][$gte]=${now}&sort=date:asc&pagination[limit]=3`)
+      .then((data) => {
+        setEvents(data.map((item: any) => ({
+          id: String(item.id),
+          title: item.title,
+          date: item.date,
+          category: item.category,
+        })))
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <section className="px-4 md:px-6 py-16">
       <div className="mx-auto max-w-7xl">
@@ -22,9 +47,26 @@ export function NextEvents() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 md:gap-6">
-          {/* Event cards will be populated with real data later */}
+          {events.map((event, i) => (
+            <div
+              key={event.id}
+              className="poster-card p-5 grain relative"
+              style={{ transform: `rotate(${i % 2 === 0 ? '-1.5deg' : '1.5deg'})` }}
+            >
+              <p className="mono text-xs uppercase opacity-70">{event.category}</p>
+              <p className="display text-2xl mt-1">{event.title}</p>
+              <p className="mono text-xs mt-2">{formatDate(event.date)}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
   )
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  const days = ['vas', 'hét', 'kedd', 'sze', 'csüt', 'pén', 'szo']
+  const months = ['jan', 'feb', 'már', 'ápr', 'máj', 'jún', 'júl', 'aug', 'szep', 'okt', 'nov', 'dec']
+  return `${date.getFullYear()}. ${months[date.getMonth()]} ${date.getDate()}. (${days[date.getDay()]}) ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
 }

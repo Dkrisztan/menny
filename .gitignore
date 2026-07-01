@@ -30,5 +30,3 @@ dist-ssr
 .env
 .env.local
 
-# Build output
-dist-admin

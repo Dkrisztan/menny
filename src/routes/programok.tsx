@@ -1,7 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { WavyLine } from '../components/ui/WavyLine'
-import { events } from '../data/events'
+import { strapiGet } from '../lib/strapi'
+
+interface Event {
+  id: string
+  title: string
+  date: string
+  category: string
+  description?: string
+}
 
 export const Route = createFileRoute('/programok')({
   component: ProgramokPage,
@@ -10,8 +18,23 @@ export const Route = createFileRoute('/programok')({
 const CATEGORIES = ['Koncert', 'Jazz', 'Táncház', 'Filmklub', 'Quiz', 'Egyéb']
 
 function ProgramokPage() {
+  const [events, setEvents] = useState<Event[]>([])
   const [activeFilters, setActiveFilters] = useState<string[]>([])
   const [view, setView] = useState<'lista' | 'naptar'>('lista')
+
+  useEffect(() => {
+    strapiGet<any>('/api/events?sort=date:desc')
+      .then((data) => {
+        setEvents(data.map((item: any) => ({
+          id: String(item.id),
+          title: item.title,
+          date: item.date,
+          category: item.category,
+          description: item.description,
+        })))
+      })
+      .catch(() => {})
+  }, [])
 
   const now = new Date()
   const upcoming = events.filter((e) => new Date(e.date) >= now)

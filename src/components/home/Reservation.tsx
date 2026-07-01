@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Asterisk } from '../ui/Asterisk'
+import { strapiPost } from '../../lib/strapi'
 
 export function Reservation() {
   const [name, setName] = useState('')
@@ -16,16 +17,12 @@ export function Reservation() {
     setErrorMsg('')
 
     try {
-      const res = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          partySize: parseInt(partySize),
-          reservedFor: new Date(reservedFor).toISOString(),
-          description: description.trim() || undefined,
-        }),
+      const res = await strapiPost('/api/reservations', {
+        name,
+        email,
+        partySize: parseInt(partySize),
+        reservedFor: new Date(reservedFor).toISOString(),
+        description: description.trim() || undefined,
       })
 
       if (res.ok) {
