@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Asterisk } from '../ui/Asterisk'
-import { strapiPost } from '../../lib/strapi'
+import { apiPost } from '../../lib/strapi'
 
 export function Reservation() {
   const [name, setName] = useState('')
@@ -17,7 +17,7 @@ export function Reservation() {
     setErrorMsg('')
 
     try {
-      const res = await strapiPost('/api/reservations', {
+      const res = await apiPost('/api/reservations', {
         name,
         email,
         partySize: parseInt(partySize),

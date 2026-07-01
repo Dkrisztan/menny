@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { strapiGet } from '../../lib/strapi'
+import { apiFetch } from '../../lib/strapi'
 
 interface Event {
   id: string
@@ -13,15 +13,14 @@ export function NextEvents() {
   const [events, setEvents] = useState<Event[]>([])
 
   useEffect(() => {
-    const now = new Date().toISOString()
-    strapiGet<any>(`/api/events?filters[date][$gte]=${now}&sort=date:asc&pagination[limit]=3`)
+    apiFetch<Event[]>('/api/events')
       .then((data) => {
-        setEvents(data.map((item: any) => ({
-          id: String(item.id),
-          title: item.title,
-          date: item.date,
-          category: item.category,
-        })))
+        const now = new Date()
+        const upcoming = data
+          .filter((e) => new Date(e.date) >= now)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(0, 3)
+        setEvents(upcoming)
       })
       .catch(() => {})
   }, [])

@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@strapi/client": "^1.6.2",
     "@tanstack/react-router": "^1.170.15",
     "@tanstack/router-plugin": "^1.168.18",
     "class-variance-authority": "^0.7.1",

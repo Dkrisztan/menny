@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { WavyLine } from '../components/ui/WavyLine'
-import { strapiGet } from '../lib/strapi'
+import { apiFetch } from '../lib/strapi'
 
 interface Event {
   id: string
@@ -23,16 +23,8 @@ function ProgramokPage() {
   const [view, setView] = useState<'lista' | 'naptar'>('lista')
 
   useEffect(() => {
-    strapiGet<any>('/api/events?sort=date:desc')
-      .then((data) => {
-        setEvents(data.map((item: any) => ({
-          id: String(item.id),
-          title: item.title,
-          date: item.date,
-          category: item.category,
-          description: item.description,
-        })))
-      })
+    apiFetch<Event[]>('/api/events')
+      .then(setEvents)
       .catch(() => {})
   }, [])
 

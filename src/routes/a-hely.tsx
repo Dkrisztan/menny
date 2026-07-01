@@ -4,7 +4,7 @@ import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { WavyLine } from '../components/ui/WavyLine'
 import { Asterisk } from '../components/ui/Asterisk'
-import { strapiGet, strapiMedia } from '../lib/strapi'
+import { apiFetch } from '../lib/strapi'
 
 export const Route = createFileRoute('/a-hely')({
   component: AHelyPage,
@@ -39,15 +39,10 @@ function AHelyPage() {
 
   useEffect(() => {
     if (galleryCache) return
-    strapiGet<any>('/api/galleries?populate=image')
+    apiFetch<GalleryImage[]>('/api/gallery')
       .then((data) => {
-        const mapped: GalleryImage[] = data.map((item: any) => ({
-          id: String(item.id),
-          url: strapiMedia(item.image?.url),
-          filename: item.image?.name ?? '',
-        }))
-        galleryCache = mapped
-        setPhotos(mapped)
+        galleryCache = data
+        setPhotos(data)
       })
       .catch(() => {})
   }, [])

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Asterisk } from '../ui/Asterisk'
-import { strapiGet } from '../../lib/strapi'
+import { apiFetch } from '../../lib/strapi'
 
 interface ScheduleDay {
   id: string
@@ -17,16 +17,8 @@ export function WeeklySchedule() {
   const [days, setDays] = useState<ScheduleDay[]>([])
 
   useEffect(() => {
-    strapiGet<any>('/api/schedule-days?sort=order:asc')
-      .then((data) => {
-        setDays(data.map((item: any) => ({
-          id: String(item.id),
-          day: item.day,
-          event: item.event,
-          time: item.time ?? null,
-          order: item.order,
-        })))
-      })
+    apiFetch<ScheduleDay[]>('/api/schedule')
+      .then(setDays)
       .catch(() => {})
   }, [])
 
